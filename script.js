@@ -35,22 +35,22 @@ document.addEventListener('keydown', function (e) {
 });
 
 //////////////////////////////////////
-console.log(document.documentElement);
-console.log(document.head);
-console.log(document.body);
+// console.log(document.documentElement);
+// console.log(document.head);
+// console.log(document.body);
 
-console.log(document.querySelector('.header'));
-const sections = document.querySelectorAll('.section');
-console.log(sections);
+// console.log(document.querySelector('.header'));
+// const sections = document.querySelectorAll('.section');
+// console.log(sections);
 
-console.log(document.getElementById('section--1'));
-console.log(document.querySelector('#section--1'));
+// console.log(document.getElementById('section--1'));
+// console.log(document.querySelector('#section--1'));
 
-const buttons = document.getElementsByTagName('button');
-console.log(buttons);
+// const buttons = document.getElementsByTagName('button');
+// console.log(buttons);
 
-const getButton = document.getElementsByClassName('btn');
-console.log(getButton);
+// const getButton = document.getElementsByClassName('btn');
+// console.log(getButton);
 
 ///////////////////////////////////////
 // const message = document.createElement('div');
@@ -156,3 +156,167 @@ btnScrollTo.addEventListener('click', function (e) {
 // document.querySelector('.nav').addEventListener('click', function (e) {
 //   this.style.backgroundColor = getRandomColor();
 // });
+
+// document.querySelectorAll('.nav__link').forEach(htmlElement => {
+//   htmlElement.addEventListener('click', function (e) {
+//     e.preventDefault();
+//     const href = this.getAttribute('href');
+//     console.log(href);
+
+//     document.querySelector(href).scrollIntoView({
+//       behavior: 'smooth',
+//     });
+//   });
+// });
+
+document.querySelector('.nav__links').addEventListener('click', function (e) {
+  e.preventDefault();
+  if (e.target.classList.contains('nav__link')) {
+    const href = e.target.getAttribute('href');
+    // console.log(href);
+
+    document.querySelector(href).scrollIntoView({
+      behavior: 'smooth',
+    });
+  }
+});
+
+//////////////////////////////
+// const h1 = document.querySelector('h1');
+// console.log(h1.querySelectorAll('.highlight'));
+// console.log(h1.childNodes);
+// console.log(h1.firstElementChild);
+// h1.firstElementChild.style.color = 'yellow';
+
+const tabs = document.querySelectorAll('.operations__tab');
+const tabContainer = document.querySelector('.operations__tab-container');
+const tabContents = document.querySelectorAll('.operations__content');
+
+tabContainer.addEventListener('click', function (e) {
+  const clickedButton = e.target.closest('.operations__tab');
+  if (!clickedButton) return;
+  tabs.forEach(tab => tab.classList.remove('operations__tab--active'));
+  clickedButton.classList.add('operations__tab--active');
+
+  tabContents.forEach(tab =>
+    tab.classList.remove('operations__content--active')
+  );
+  document
+    .querySelector(`.operations__content--${clickedButton.dataset.tab}`)
+    .classList.add('operations__content--active');
+});
+
+const nav = document.querySelector('.nav');
+nav.addEventListener('mouseover', function (e) {
+  if (e.target.classList.contains('nav__link')) {
+    const linkOver = e.target;
+    const siblingLinks = linkOver
+      .closest('.nav__links')
+      .querySelectorAll('.nav__link');
+    const logo = linkOver.closest('.nav').querySelector('img');
+    const logoTetx = linkOver.closest('.nav').querySelector('.nav__text');
+
+    siblingLinks.forEach(item => {
+      if (item !== linkOver) {
+        item.style.opacity = 0.4;
+      }
+      logo.style.opacity = 0.4;
+      logoTetx.style.opacity = 0.4;
+    });
+  }
+});
+
+nav.addEventListener('mouseout', function (e) {
+  if (e.target.classList.contains('nav__link')) {
+    const linkOver = e.target;
+    const siblingLinks = linkOver
+      .closest('.nav__links')
+      .querySelectorAll('.nav__link');
+    const logo = linkOver.closest('.nav').querySelector('img');
+    const logoTetx = linkOver.closest('.nav').querySelector('.nav__text');
+
+    siblingLinks.forEach(item => {
+      if (item !== linkOver) {
+        item.style.opacity = 1;
+      }
+      logo.style.opacity = 1;
+      logoTetx.style.opacity = 1;
+    });
+  }
+});
+
+// const section1Cords = section1.getBoundingClientRect();
+// window.addEventListener('scroll', function (e) {
+//   // console.log(e);
+//   console.log(window.scrollY);
+//   window.scrollY > section1Cords.top
+//     ? nav.classList.add('sticky')
+//     : nav.classList.remove('sticky');
+// });
+
+// const obserberCallback = function (entries, observer) {
+//   entries.forEach(entry => console.log(entry));
+// };
+// const observerOptions = {
+//   root: null,
+//   threshold: [0, 0.2],
+// };
+// const observer = new IntersectionObserver(obserberCallback, observerOptions);
+// observer.observe(section1);
+const getStickyNav = function (entries) {
+  const entry = entries[0];
+  if (!entry.isIntersecting) {
+    nav.classList.add('sticky');
+  } else {
+    nav.classList.remove('sticky');
+  }
+};
+const headerObserver = document.querySelector('.header');
+const observer = new IntersectionObserver(getStickyNav, {
+  root: null,
+  threshold: 0,
+  rootMargin: '-90px',
+});
+observer.observe(headerObserver);
+
+const allSection = document.querySelectorAll('.section');
+
+const appearanceSection = function (entries, observer) {
+  const entry = entries[0];
+  if (entry.isIntersecting) {
+    entry.target.classList.remove('section--hidden');
+    observer.unobserve(entry.target);
+  }
+};
+
+const sectionObserver = new IntersectionObserver(appearanceSection, {
+  root: null,
+  threshold: 0.18,
+});
+
+allSection.forEach(function (section) {
+  sectionObserver.observe(section);
+  section.classList.add('section--hidden');
+});
+
+const loadImages = function (entries, observer) {
+  const entry = entries[0];
+  if (!entry.isIntersecting) {
+    return;
+  }
+
+  entry.target.src = entry.target.dataset.src;
+
+  entry.target.addEventListener('load', function () {
+    entry.target.classList.remove('lazy-img');
+  });
+  observer.unobserve(entry.target);
+};
+
+const lazyImages = document.querySelectorAll('img[data-src]');
+const lazyImagesObserver = new IntersectionObserver(loadImages, {
+  root: null,
+  threshold: 0.45,
+});
+
+lazyImages.forEach(image => lazyImagesObserver.observe(image));
